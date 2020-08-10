@@ -1,13 +1,13 @@
 function setup() {
-    R = 30
+    R = floor(min(windowWidth/10, windowHeight/11)/2)
     D = 2 * R
     board = loadBoard()
-    width = board.width * D + D
-    height = board.height * D + 2 *     D
-    createCanvas(width, height).mouseClicked(submit)
+    width = 10 * D
+    height = 11 * D
+    createCanvas(width, height).mouseClicked(handleClick)
     ellipseMode(RADIUS)
     strokeCap(PROJECT)
-    textSize(30)
+    textSize(R)
     textAlign(CENTER, CENTER)
 }
 
@@ -42,17 +42,18 @@ function draw() {
     push()
     rectMode(RADIUS)
     fill('black')
+    noStroke()
 
     bx = width/2 - 2*D
     by = height - R
-    textSize(50 + (dist(mouseX, mouseY, bx, by) < D) * (6 + mouseIsPressed*6))
+    textSize(D + (dist(mouseX, mouseY, bx, by) < D) * (6 + mouseIsPressed*6))
     // rect(bx, by, 2*R - 1, R-1)
     text('Black', bx, by)
 
     fill('white')
     wx = width/2 + 2*D
     wy = height - R
-    textSize(50 + (dist(mouseX, mouseY, wx, wy) < D) * (6 + mouseIsPressed*6))
+    textSize(D + (dist(mouseX, mouseY, wx, wy) < D) * (6 + mouseIsPressed*6))
     text('White', wx, wy)
     pop()
 }
@@ -87,17 +88,15 @@ function loadBoard() {
 			
 }
 
-function submit(submission) {
-    if (!submission) {
-        if (dist(mouseX, mouseY, bx, by) < D) {
-            submission = "black"
-        } else if (dist(mouseX, mouseY, wx, wy) < D) {
-            submission = "white"
-        } else {
-            return
-        }
-
+function handleClick() {
+    if (dist(mouseX, mouseY, bx, by) < D) {
+        submit('black')
+    } else if (dist(mouseX, mouseY, wx, wy) < D) {
+        submit('white')
     }
+}
+
+function submit(submission) {
     if (submission === correct) {
         board = loadBoard()
     } else {
@@ -108,4 +107,13 @@ function submit(submission) {
 function keyPressed() {
     if (keyCode === LEFT_ARROW)  submit('black')
     if (keyCode === RIGHT_ARROW) submit('white')
+}
+
+function mouseReleased() {
+    return false
+}
+
+function touchEnded() {
+    mouseX = undefined
+    mouseY = undefined
 }
