@@ -1,14 +1,27 @@
 function setup() {
-    R = floor(min(windowWidth/10, windowHeight/11)/2)
-    D = 2 * R
+
+    createCanvas(100, 100).mouseClicked(handleClick)
+    windowResized()
+    
     board = loadBoard()
-    width = 10 * D
-    height = 11 * D
-    createCanvas(width, height).mouseClicked(handleClick)
     ellipseMode(RADIUS)
     strokeCap(PROJECT)
     textSize(R)
     textAlign(CENTER, CENTER)
+}
+
+function windowResized() {
+    R = floor(min(windowWidth/10, windowHeight/11)/2)
+    D = 2 * R
+    width = 10 * D
+    height = 11 * D
+
+    bx = width/2 - 2*D
+    by = height - R
+    wx = width/2 + 2*D
+    wy = height - R
+    
+    resizeCanvas(width, height)
 }
 
 function draw() {
@@ -44,16 +57,26 @@ function draw() {
     fill('black')
     noStroke()
 
-    bx = width/2 - 2*D
-    by = height - R
-    textSize(D + (dist(mouseX, mouseY, bx, by) < D) * (6 + mouseIsPressed*6))
-    // rect(bx, by, 2*R - 1, R-1)
+    
+    if (keyIsDown(LEFT_ARROW)) {
+        textSize(D + 12)
+    } else if (dist(mouseX, mouseY, bx, by) < D) {
+        if (mouseIsPressed) textSize(D + 12)
+        else textSize(D + 6)
+    } else {
+        textSize(D)
+    }
     text('Black', bx, by)
 
     fill('white')
-    wx = width/2 + 2*D
-    wy = height - R
-    textSize(D + (dist(mouseX, mouseY, wx, wy) < D) * (6 + mouseIsPressed*6))
+    if (keyIsDown(RIGHT_ARROW)) {
+        textSize(D + 12)
+    } else if (dist(mouseX, mouseY, wx, wy) < D) {
+        if (mouseIsPressed) textSize(D + 12)
+        else textSize(D + 6)
+    } else {
+        textSize(D)
+    }
     text('White', wx, wy)
     pop()
 }
