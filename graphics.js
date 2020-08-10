@@ -15,12 +15,14 @@ function windowResized() {
     D = 2 * R
     width = 10 * D
     height = 11 * D
+    halfStrokeWeight = ceil(D/70)
+    strokeWeight(2 * halfStrokeWeight)
 
     bx = width/2 - 2*D
     by = height - R
     wx = width/2 + 2*D
     wy = height - R
-    
+
     resizeCanvas(width, height)
 }
 
@@ -29,7 +31,6 @@ function draw() {
     
     push()
     stroke(0)
-    strokeWeight(2)
     translate(D, D)
 
     for (let x = 0; x < board.width; x ++) {
@@ -40,13 +41,11 @@ function draw() {
         line(0, y * D, (board.width - 1) * D, y * D)
     }
 
-    strokeWeight(2)
-
     for (let x = 0; x < board.width; x ++) {
         for (let y = 0; y < board.height; y ++) {
             if (board[x][y]) {
                 fill((board[x][y] === -1) * 255)
-                circle(x * D, y * D, R - 1)
+                circle(x * D, y * D, R - halfStrokeWeight)
             }
         }
     }
@@ -117,6 +116,8 @@ function handleClick() {
     } else if (dist(mouseX, mouseY, wx, wy) < D) {
         submit('white')
     }
+    mouseX = undefined
+    mouseY = undefined
 }
 
 function submit(submission) {
