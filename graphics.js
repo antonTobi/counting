@@ -1,29 +1,47 @@
+S = window.localStorage
+
 function setup() {
+    if (!S.highscore) S.highscore = 0
+    if (!S.score) S.score = 0
 
     createCanvas(100, 100).mouseClicked(handleClick)
     windowResized()
     
-    board = loadBoard()
     ellipseMode(RADIUS)
     strokeCap(PROJECT)
-    textSize(R)
-    textAlign(CENTER, CENTER)
+    noStroke()
+
+    loadBoard()
 }
 
 function windowResized() {
-    R = floor(min(windowWidth/10, windowHeight/11)/2)
+    R = floor(min(windowWidth/10, windowHeight/12)/2)
     D = 2 * R
     width = 10 * D
-    height = 11 * D
+    height = 12 * D
     halfStrokeWeight = ceil(D/70)
     strokeWeight(2 * halfStrokeWeight)
 
+    sx = width/2
+    sy = 1.5*R
     bx = width/2 - 2*D
-    by = height - R
+    by = height - 1.5*R
     wx = width/2 + 2*D
-    wy = height - R
-
+    wy = height - 1.5*R
+    
     resizeCanvas(width, height)
+}
+
+function getScoreGain() {
+    if (failed) return 0
+    let passedTime = floor((millis() - startTime)*0.001)
+    return max(20 - passedTime, 1)
+}
+
+function pad(s, length) {
+    s += ''
+    while (s.length < length) s = '0' + s
+    return s
 }
 
 function draw() {
@@ -31,7 +49,7 @@ function draw() {
     
     push()
     stroke(0)
-    translate(D, D)
+    translate(D, 2*D)
 
     for (let x = 0; x < board.width; x ++) {
         line(x * D, 0, x * D, (board.height - 1) * D)
@@ -52,11 +70,25 @@ function draw() {
     pop()
 
     push()
-    rectMode(RADIUS)
-    fill('black')
-    noStroke()
+    textFont('courier')
+    textSize(D)
 
-    
+    fill('white')
+    textAlign(LEFT, CENTER)
+    text(pad(S.score, 4), D, sy)
+
+    textAlign(CENTER, CENTER)
+    text(pad(getScoreGain(), 2), sx, sy)
+
+    fill('black')
+    textAlign(RIGHT, CENTER)
+    text(pad(window.localStorage.highscore, 4), width - D, sy)
+
+    pop()
+
+    textAlign(CENTER, CENTER)
+
+    fill('black')
     if (keyIsDown(LEFT_ARROW)) {
         textSize(D + 12)
     } else if (dist(mouseX, mouseY, bx, by) < D) {
@@ -65,7 +97,7 @@ function draw() {
     } else {
         textSize(D)
     }
-    text('Black', bx, by)
+    text('black', bx, by)
 
     fill('white')
     if (keyIsDown(RIGHT_ARROW)) {
@@ -76,19 +108,13 @@ function draw() {
     } else {
         textSize(D)
     }
-    text('White', wx, wy)
-    pop()
-}
+    text('white', wx, wy)
 
-charToInt = {
-	'O': 1,
-	'X': -1,
-	'.': 0,
 }
 
 function loadBoard() {
 	let textBoard = random(boards).split('\n').map(row => row.split(' '))
-    let board = {width: textBoard[0].length, height: textBoard.length}
+    board = {width: textBoard[0].length, height: textBoard.length}
 
 	let flipX = random() < 0.5
 	let flipY = random() < 0.5
@@ -102,12 +128,12 @@ function loadBoard() {
 			let a = flipX ? board.width - 1 - x : x
 			let b = flipY ? board.height - 1 - y : y
 			if (transpose) [a, b] = [b, a]
-			board[x][y] = charToInt[textBoard[b][a]] * (-1)**invert
+			board[x][y] = {'O':1,'X':-1,'.':0}[textBoard[b][a]] * (-1)**invert
         }
     }
+    failed = false
     document.bgColor = 'seagreen'
-    return board
-			
+    startTime = millis()			
 }
 
 function handleClick() {
@@ -116,15 +142,21 @@ function handleClick() {
     } else if (dist(mouseX, mouseY, wx, wy) < D) {
         submit('white')
     }
-    mouseX = undefined
-    mouseY = undefined
+    mouseX = -1
+    mouseY = -1
 }
 
 function submit(submission) {
     if (submission === correct) {
-        board = loadBoard()
+        S.score = parseInt(S.score) + getScoreGain()
+        S.highscore = max(S.score, S.highscore)
+        loadBoard()
     } else {
-        document.bgColor = 'crimson'
+        if (!failed) {
+            failed = true
+            S.score = floor(S.score/2)
+            document.bgColor = 'crimson'
+        }
     }
 }
 
@@ -138,6 +170,6 @@ function mouseReleased() {
 }
 
 function touchEnded() {
-    mouseX = undefined
-    mouseY = undefined
+    mouseX = -1
+    mouseY = -1
 }

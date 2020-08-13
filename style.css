@@ -2,10 +2,6 @@ html, body {
   height: 100%;
 }
 
-/* body {
-  background-image: url('wood1.jpg');
-} */
-
 body {
   margin: 0;
   display: flex;
