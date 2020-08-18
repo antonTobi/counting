@@ -123,6 +123,7 @@ function draw() {
     stroke('white')
     strokeCap(ROUND)
     if (timer > 0) line(width/2 - dx, D, width/2 + dx, D)
+
     // rect(D, R, xt - D, R)
     // fill(255, 50)
     // rect(x1, R, x2 - x1, R)
@@ -207,8 +208,8 @@ function handleClick() {
     mouseY = -1
 }
 
-function submit(submission) {
-    if (submission === correct) {
+function submit(guess) {
+    if (guess === correct) {
         S.score = parseInt(S.score) + getScoreGain()
         score ++
         S.highscore = max(S.score, S.highscore)
