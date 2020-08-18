@@ -192,7 +192,8 @@ function handleClick() {
     }
 
     if (dist(mouseX, mouseY, width - 2*D, R) < R) {
-        window.open('about.html')
+        // window.open('about.html')
+        window.location.href = "http://count.4tc.xyz/about.html"
     }
     if (timer > 0) {
         if (dist(mouseX, mouseY, bx, by) < D) {
