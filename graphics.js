@@ -1,15 +1,18 @@
 S = window.localStorage
+maxTime = 10 * 1000
 
 function setup() {
     if (!S.highscore) S.highscore = 0
     if (!S.score) S.score = 0
 
-    createCanvas(100, 100).mouseClicked(handleClick)
+    createCanvas().mouseClicked(handleClick)
     windowResized()
     
     ellipseMode(RADIUS)
     strokeCap(PROJECT)
     noStroke()
+
+    timer = maxTime
 
     loadBoard()
 }
@@ -34,8 +37,9 @@ function windowResized() {
 
 function getScoreGain() {
     if (failed) return 0
-    let passedTime = floor((millis() - startTime)*0.001)
-    return max(20 - passedTime, 1)
+    let passedTime = (millis() - startTime)*0.001
+    if (passedTime < 1) return 30 * passedTime
+    return max(30 - passedTime, 5)
 }
 
 function pad(s, length) {
@@ -69,46 +73,83 @@ function draw() {
     }
     pop()
 
+    // push()
+    // textFont('courier')
+    // textSize(D)
+
+    // fill('white')
+    // textAlign(LEFT, CENTER)
+    // text(pad(S.score, 4), D, sy)
+
+    // textAlign(CENTER, CENTER)
+    // text(pad(getScoreGain(), 2), sx, sy)
+
+    // fill('black')
+    // textAlign(RIGHT, CENTER)
+    // text(pad(window.localStorage.highscore, 4), width - D, sy)
+
+    // pop()
+
     push()
-    textFont('courier')
-    textSize(D)
-
+    textSize(R)
+    if (dist(mouseX, mouseY, D, R) < R) textSize(R * 1.2)
     fill('white')
-    textAlign(LEFT, CENTER)
-    text(pad(S.score, 4), D, sy)
+    // textAlign(LEFT, TOP)
+    text("restart", D, R)
 
-    textAlign(CENTER, CENTER)
-    text(pad(getScoreGain(), 2), sx, sy)
-
+    textSize(R)
+    if (dist(mouseX, mouseY, width - D, R) < R) textSize(R * 1.2)
     fill('black')
-    textAlign(RIGHT, CENTER)
-    text(pad(window.localStorage.highscore, 4), width - D, sy)
+    // textAlign(RIGHT, TOP)
+    text("help", width - D, R)
+    pop()
+
+    push()
+
+    let x1 = map(S.score, 0, 360, D, width - D)
+    let x2 = map(S.score - (-getScoreGain()), 0, 360, D, width - D)
+
+    let dx = map(timer, 0, maxTime, 0, width/2 - D)
+    
+    fill(255)
+    stroke('white')
+    if (timer > 0) line(width/2 - dx, D, width/2 + dx, D)
+    // rect(D, R, xt - D, R)
+    // fill(255, 50)
+    // rect(x1, R, x2 - x1, R)
+
+    // noFill()
+    // stroke('black')
+    // rect(D, R, width - 2*D, R)
 
     pop()
 
-    textAlign(CENTER, CENTER)
+    timer -= deltaTime
+    if (timer > 0) {
+        textAlign(CENTER, CENTER)
 
-    fill('black')
-    if (keyIsDown(LEFT_ARROW)) {
-        textSize(D + 12)
-    } else if (dist(mouseX, mouseY, bx, by) < D) {
-        if (mouseIsPressed) textSize(D + 12)
-        else textSize(D + 6)
-    } else {
-        textSize(D)
+        fill('black')
+        if (keyIsDown(LEFT_ARROW)) {
+            textSize(D + 12)
+        } else if (dist(mouseX, mouseY, bx, by) < D) {
+            if (mouseIsPressed) textSize(D + 12)
+            else textSize(D + 6)
+        } else {
+            textSize(D)
+        }
+        text('black', bx, by)
+    
+        fill('white')
+        if (keyIsDown(RIGHT_ARROW)) {
+            textSize(D + 12)
+        } else if (dist(mouseX, mouseY, wx, wy) < D) {
+            if (mouseIsPressed) textSize(D + 12)
+            else textSize(D + 6)
+        } else {
+            textSize(D)
+        }
+        text('white', wx, wy)
     }
-    text('black', bx, by)
-
-    fill('white')
-    if (keyIsDown(RIGHT_ARROW)) {
-        textSize(D + 12)
-    } else if (dist(mouseX, mouseY, wx, wy) < D) {
-        if (mouseIsPressed) textSize(D + 12)
-        else textSize(D + 6)
-    } else {
-        textSize(D)
-    }
-    text('white', wx, wy)
 
 }
 
@@ -137,11 +178,21 @@ function loadBoard() {
 }
 
 function handleClick() {
-    if (dist(mouseX, mouseY, bx, by) < D) {
-        submit('black')
-    } else if (dist(mouseX, mouseY, wx, wy) < D) {
-        submit('white')
+    if (dist(mouseX, mouseY, D, R) < R) {
+        setup()
     }
+
+    if (dist(mouseX, mouseY, width - D, R) < R) {
+        window.open('help.html')
+    }
+    if (timer > 0) {
+        if (dist(mouseX, mouseY, bx, by) < D) {
+            submit('black')
+        } else if (dist(mouseX, mouseY, wx, wy) < D) {
+            submit('white')
+        }
+    }
+    
     mouseX = -1
     mouseY = -1
 }
@@ -154,7 +205,8 @@ function submit(submission) {
     } else {
         if (!failed) {
             failed = true
-            S.score = floor(S.score/2)
+            // S.score = floor(S.score/2)
+            S.score = 0
             document.bgColor = 'crimson'
         }
     }
