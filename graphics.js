@@ -1,5 +1,5 @@
 S = window.localStorage
-maxTime = 10 * 1000
+maxTime = 60 * 1000
 
 function setup() {
     if (!S.highscore) S.highscore = 0
@@ -13,6 +13,7 @@ function setup() {
     noStroke()
 
     timer = maxTime
+    score = 0
 
     loadBoard()
 }
@@ -92,27 +93,35 @@ function draw() {
 
     push()
     textSize(R)
-    if (dist(mouseX, mouseY, D, R) < R) textSize(R * 1.2)
-    fill('white')
+    if (dist(mouseX, mouseY, 2*D, 0.5*R) < 1.5*R) textSize(R * 1.1)
+    fill('black')
     // textAlign(LEFT, TOP)
-    text("restart", D, R)
+    text('restart', 2*D, R)
+
+    push()
+    fill('white')
+    textSize(D)
+    textFont('courier')
+    text(score, width/2, R)
+    pop()
 
     textSize(R)
-    if (dist(mouseX, mouseY, width - D, R) < R) textSize(R * 1.2)
+    if (dist(mouseX, mouseY, width - 2*D, 0.5*R) < 1.5*R) textSize(R * 1.1)
     fill('black')
     // textAlign(RIGHT, TOP)
-    text("help", width - D, R)
+    text('about', width - 2*D, R)
     pop()
 
     push()
 
-    let x1 = map(S.score, 0, 360, D, width - D)
-    let x2 = map(S.score - (-getScoreGain()), 0, 360, D, width - D)
+    // let x1 = map(S.score, 0, 360, D, width - D)
+    // let x2 = map(S.score - (-getScoreGain()), 0, 360, D, width - D)
 
     let dx = map(timer, 0, maxTime, 0, width/2 - D)
     
     fill(255)
     stroke('white')
+    strokeCap(ROUND)
     if (timer > 0) line(width/2 - dx, D, width/2 + dx, D)
     // rect(D, R, xt - D, R)
     // fill(255, 50)
@@ -178,12 +187,12 @@ function loadBoard() {
 }
 
 function handleClick() {
-    if (dist(mouseX, mouseY, D, R) < R) {
+    if (dist(mouseX, mouseY, 2*D, R) < R) {
         setup()
     }
 
-    if (dist(mouseX, mouseY, width - D, R) < R) {
-        window.open('help.html')
+    if (dist(mouseX, mouseY, width - 2*D, R) < R) {
+        window.open('about.html')
     }
     if (timer > 0) {
         if (dist(mouseX, mouseY, bx, by) < D) {
@@ -200,21 +209,27 @@ function handleClick() {
 function submit(submission) {
     if (submission === correct) {
         S.score = parseInt(S.score) + getScoreGain()
+        score ++
         S.highscore = max(S.score, S.highscore)
         loadBoard()
     } else {
         if (!failed) {
-            failed = true
+            timer = -1
+            // failed = true
             // S.score = floor(S.score/2)
-            S.score = 0
+            // S.score = 0
             document.bgColor = 'crimson'
         }
     }
 }
 
 function keyPressed() {
-    if (keyCode === LEFT_ARROW)  submit('black')
-    if (keyCode === RIGHT_ARROW) submit('white')
+    if (keyCode === ENTER) setup()
+    if (timer > 0) {
+        if (keyCode === LEFT_ARROW)  submit('black')
+        if (keyCode === RIGHT_ARROW) submit('white')
+    }
+    
 }
 
 function mouseReleased() {
