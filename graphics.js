@@ -1,25 +1,27 @@
-S = window.localStorage
-maxTime = 60 * 1000
+function preload() {
+    seconds = prompt('Seconds per board: (leave empty for no timer)', window.localStorage.seconds || '')
+    seconds = round(parseInt(seconds))
+    if (!seconds || seconds <= 0) {seconds = Infinity}
+    maxTime = seconds * 1000
+    if (seconds == Infinity) seconds = ''
+    window.localStorage.seconds = seconds
+}
 
 function setup() {
-    if (!S.highscore) S.highscore = 0
-    if (!S.score) S.score = 0
-
     createCanvas().mouseClicked(handleClick)
     windowResized()
     
     ellipseMode(RADIUS)
     strokeCap(PROJECT)
     noStroke()
-
-    timer = maxTime
     score = 0
+    started = false
 
     loadBoard()
 }
 
 function windowResized() {
-    R = floor(min(windowWidth/10, windowHeight/12)/2)
+    R = floor(min(window.innerWidth/10, window.innerHeight/12)/2)
     D = 2 * R
     width = 10 * D
     height = 12 * D
@@ -34,19 +36,6 @@ function windowResized() {
     wy = height - 1.5*R
     
     resizeCanvas(width, height)
-}
-
-function getScoreGain() {
-    if (failed) return 0
-    let passedTime = (millis() - startTime)*0.001
-    if (passedTime < 1) return 30 * passedTime
-    return max(30 - passedTime, 5)
-}
-
-function pad(s, length) {
-    s += ''
-    while (s.length < length) s = '0' + s
-    return s
 }
 
 function draw() {
@@ -74,48 +63,28 @@ function draw() {
     }
     pop()
 
-    // push()
-    // textFont('courier')
-    // textSize(D)
-
-    // fill('white')
-    // textAlign(LEFT, CENTER)
-    // text(pad(S.score, 4), D, sy)
-
-    // textAlign(CENTER, CENTER)
-    // text(pad(getScoreGain(), 2), sx, sy)
-
-    // fill('black')
-    // textAlign(RIGHT, CENTER)
-    // text(pad(window.localStorage.highscore, 4), width - D, sy)
-
-    // pop()
-
     push()
     textSize(R)
     if (dist(mouseX, mouseY, 2*D, 0.5*R) < 1.5*R) textSize(R * 1.1)
     fill('black')
-    // textAlign(LEFT, TOP)
     text('restart', 2*D, R)
 
     push()
     fill('white')
     textSize(D)
-    textFont('courier')
+    
+    textFont('courier')    
     text(score, width/2, R)
+    
     pop()
 
     textSize(R)
     if (dist(mouseX, mouseY, width - 2*D, 0.5*R) < 1.5*R) textSize(R * 1.1)
     fill('black')
-    // textAlign(RIGHT, TOP)
     text('about', width - 2*D, R)
     pop()
 
     push()
-
-    // let x1 = map(S.score, 0, 360, D, width - D)
-    // let x2 = map(S.score - (-getScoreGain()), 0, 360, D, width - D)
 
     let dx = map(timer, 0, maxTime, 0, width/2 - D)
     
@@ -123,19 +92,11 @@ function draw() {
     stroke('white')
     strokeCap(ROUND)
     if (timer > 0) line(width/2 - dx, D, width/2 + dx, D)
-
-    // rect(D, R, xt - D, R)
-    // fill(255, 50)
-    // rect(x1, R, x2 - x1, R)
-
-    // noFill()
-    // stroke('black')
-    // rect(D, R, width - 2*D, R)
-
     pop()
 
-    timer -= deltaTime
+    
     if (timer > 0) {
+        
         textAlign(CENTER, CENTER)
 
         fill('black')
@@ -159,6 +120,23 @@ function draw() {
             textSize(D)
         }
         text('white', wx, wy)
+        if (started) {
+            timer -= deltaTime
+        }
+        if (timer <= 0) {
+            document.bgColor = "royalblue"
+        }
+    } else {
+        textSize(R)
+        noStroke()
+        fill(0, 200)
+        let plurality = (score == 1) ? 'board' : 'boards'
+        if (seconds == '') {
+            text(`Game over!\nYou solved ${score} ${plurality}.`, width/2, by)
+        } else {
+            text(`Game over!\nYou solved ${score} ${plurality} in ${seconds}s per board.`, width/2, by)
+        }
+        
     }
 
 }
@@ -184,7 +162,8 @@ function loadBoard() {
     }
     failed = false
     document.bgColor = 'seagreen'
-    startTime = millis()			
+    startTime = millis()
+    timer = maxTime
 }
 
 function handleClick() {
@@ -193,7 +172,6 @@ function handleClick() {
     }
 
     if (dist(mouseX, mouseY, width - 2*D, R) < R) {
-        // window.open('about.html')
         window.location.href = "http://count.4tc.xyz/about.html"
     }
     if (timer > 0) {
@@ -209,17 +187,14 @@ function handleClick() {
 }
 
 function submit(guess) {
+    started = true
     if (guess === correct) {
-        S.score = parseInt(S.score) + getScoreGain()
         score ++
-        S.highscore = max(S.score, S.highscore)
+        maxTime -= 1000
         loadBoard()
     } else {
         if (!failed) {
             timer = -1
-            // failed = true
-            // S.score = floor(S.score/2)
-            // S.score = 0
             document.bgColor = 'crimson'
         }
     }
