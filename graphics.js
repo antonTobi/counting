@@ -21,7 +21,7 @@ function setup() {
 }
 
 function windowResized() {
-    R = floor(min(window.innerWidth/10, window.innerHeight/12)/2)
+    R = floor(min(window.innerWidth/10, window.innerHeight/12)/2)-1
     D = 2 * R
     width = 10 * D
     height = 12 * D
