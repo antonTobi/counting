@@ -172,7 +172,7 @@ function handleClick() {
     }
 
     if (dist(mouseX, mouseY, width - 2*D, R) < R) {
-        window.location.href = "http://count.4tc.xyz/about.html"
+        window.location.href = "https://count.antontobi.com/about.html"
     }
     if (timer > 0) {
         if (dist(mouseX, mouseY, bx, by) < D) {
