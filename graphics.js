@@ -18,6 +18,7 @@ function setup() {
     noStroke()
     score = 0
     started = false
+    gameOver = false
 
     loadBoard()
 }
@@ -78,7 +79,9 @@ function draw() {
     textFont('courier')    
     // text(score, width/2, R)
     // textSize(R)
-    text((timer/1000).toFixed(1), width/2, R)
+    if (timer > 0) {
+        text((timer/1000).toFixed(1), width/2, R)
+    }
     
     pop()
 
@@ -98,7 +101,7 @@ function draw() {
     if (timer > 0) line(width/2 - dx, D, width/2 + dx, D)
     pop()
     
-    if (timer > 0) {
+    if (!gameOver) {
         
         textAlign(CENTER, CENTER)
 
@@ -128,6 +131,7 @@ function draw() {
         }
         if (timer <= 0) {
             document.bgColor = "royalblue"
+            gameOver = true
         }
     } else {
         textSize(R)
@@ -158,7 +162,6 @@ function loadBoard() {
 			board[x][y] = {'O':1,'X':-1,'.':0}[textBoard[b][a]] * (-1)**invert
         }
     }
-    failed = false
     document.bgColor = 'seagreen'
     startTime = millis()
     timer = maxTime
@@ -172,7 +175,7 @@ function handleClick() {
     if (dist(mouseX, mouseY, width - 2*D, R) < R) {
         window.location.href = "https://count.antontobi.com/about.html"
     }
-    if (timer > 0) {
+    if (!gameOver) {
         if (dist(mouseX, mouseY, bx, by) < D) {
             submit('black')
         } else if (dist(mouseX, mouseY, wx, wy) < D) {
@@ -191,16 +194,14 @@ function submit(guess) {
         score ++
         loadBoard()
     } else {
-        if (!failed) {
-            timer = -1
-            document.bgColor = 'crimson'
-        }
+        document.bgColor = 'crimson'
+        gameOver = true
     }
 }
 
 function keyPressed() {
     if (keyCode === ENTER) setup()
-    if (timer > 0) {
+    if (!gameOver) {
         if (keyCode === LEFT_ARROW)  submit('black')
         if (keyCode === RIGHT_ARROW) submit('white')
     }
