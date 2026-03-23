@@ -1,13 +1,15 @@
-function preload() {
-    seconds = prompt('Seconds per board: (leave empty for no timer)', window.localStorage.seconds || '')
-    seconds = round(parseInt(seconds))
-    if (!seconds || seconds <= 0) {seconds = Infinity}
-    maxTime = seconds * 1000
-    if (seconds == Infinity) seconds = ''
-    window.localStorage.seconds = seconds
-}
+// function preload() {
+//     seconds = prompt('Seconds per board: (leave empty for no timer)', window.localStorage.seconds || '')
+//     seconds = round(parseInt(seconds))
+//     if (!seconds || seconds <= 0) {seconds = Infinity}
+//     maxTime = seconds * 1000
+//     if (seconds == Infinity) seconds = ''
+//     window.localStorage.seconds = seconds
+// }
 
 function setup() {
+
+    maxTime = 30 * 1000
     createCanvas().mouseClicked(handleClick)
     windowResized()
     
@@ -74,7 +76,9 @@ function draw() {
     textSize(D)
     
     textFont('courier')    
-    text(score, width/2, R)
+    // text(score, width/2, R)
+    // textSize(R)
+    text((timer/1000).toFixed(1), width/2, R)
     
     pop()
 
@@ -93,7 +97,6 @@ function draw() {
     strokeCap(ROUND)
     if (timer > 0) line(width/2 - dx, D, width/2 + dx, D)
     pop()
-
     
     if (timer > 0) {
         
@@ -131,12 +134,7 @@ function draw() {
         noStroke()
         fill(0, 200)
         let plurality = (score == 1) ? 'board' : 'boards'
-        if (seconds == '') {
-            text(`Game over!\nYou solved ${score} ${plurality}.`, width/2, by)
-        } else {
-            text(`Game over!\nYou solved ${score} ${plurality} in ${seconds}s per board.`, width/2, by)
-        }
-        
+        text(`Game over!\nYou solved ${score} ${plurality}.`, width/2, by)
     }
 
 }
@@ -189,8 +187,8 @@ function handleClick() {
 function submit(guess) {
     started = true
     if (guess === correct) {
+        if (score && maxTime > 10000) maxTime -= 1000
         score ++
-        maxTime -= 1000
         loadBoard()
     } else {
         if (!failed) {
